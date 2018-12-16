@@ -112,6 +112,8 @@ int ll_select_n_min_1(ll_t *list, ll_node_t **node, int n, locktype_t lt) {
 	if (*node == NULL) // if head is NULL, but we're trying to go past it,
 		return -1;     // we have a problem
 
+	printf("list->hd is not null \n");
+
 	RWLOCK(lt, (*node)->m);
 
 	ll_node_t *last;
@@ -135,6 +137,36 @@ int ll_select_n_min_1(ll_t *list, ll_node_t **node, int n, locktype_t lt) {
 
 }
 
+// Just a wrapper for `ll_insert_n` called with the index being the length of the linked list
+
+int ll_insert_last(ll_t *list, void *val) {
+    return ll_insert_n_2(list, val, list->len);
+}
+
+// Inserts a value at the nth position of a linked list.
+
+int ll_insert_n_2(ll_t *list, void *val, int n) {
+	
+	ll_node_t *new_node = ll_new_node(val);
+
+	ll_node_t *nth_node = NULL;
+	
+	if (ll_select_n_min_1(list, &nth_node, n, l_write)) {
+		free(new_node);
+		return -1;
+	}
+        
+	new_node->nxt = nth_node->nxt;
+	nth_node->nxt = new_node;
+	RWUNLOCK(nth_node->m);
+
+	RWLOCK(l_write, list->m);
+	(list->len)++;
+	RWUNLOCK(list->m);
+
+	return list->len;
+}
+
 
 // Gets the value of the nth element of a linked list.
 void *ll_get_n(ll_t *list, int n) {
@@ -148,10 +180,51 @@ void *ll_get_n(ll_t *list, int n) {
 }
 
 
+// Wrapper for `ll_remove_n`.
+int ll_remove_first(ll_t *list) {
+    return ll_remove_n(list, 0);
+}
+
+// Removes the nth element of the linked list.
+
+int ll_remove_n(ll_t *list, int n) {
+	ll_node_t *tmp;
+	
+	n = 0;
+	printf("Value in n %d\n", n);
+
+	RWLOCK(l_write, list->m);
+	tmp = list->hd;
+
+	printf("Before NULL check \n");
+
+	if(tmp == NULL) {
+		RWUNLOCK(list->m);
+		return -1;	
+	}
+
+	printf("After NULL check \n");
+
+	if(tmp->nxt == NULL)
+		printf("tmp->nxt is null \n");		
+
+	list->hd = tmp->nxt;
+
+	(list->len)--;
+	RWUNLOCK(list->m);
+
+	list->val_teardown(tmp->val);
+	free(tmp);
+
+	return list->len;
+}
+
+
 int main() {
 
 	int *_n;
 	int c = 2;
+	int d = 100;
 
 	int test_count = 1;
 	int fail_count = 0;
@@ -166,10 +239,43 @@ int main() {
 		fprintf(stderr, "FAIL Test %d: Expected %d, but got %d.\n", test_count, c, *_n);
 		fail_count++;
 
-	} else
-
+	} else {
+		
 		fprintf(stderr, "PASS Test %d!\n", test_count);
+		fprintf(stderr, "Value: %d\n", *_n);
+
+	}
 
 	test_count++;
+
+	ll_insert_last(list, &d);
 	
+	ll_remove_first(list);
+	_n = (int *)ll_get_first(list);
+
+	if (!(*_n == d)) {
+                fprintf(stderr, "FAIL Test %d: Expected %d, but got %d.\n", test_count, d, *_n);
+                fail_count++;
+
+        } else {
+
+                fprintf(stderr, "PASS Test %d!\n", test_count);
+                fprintf(stderr, "Value: %d\n", *_n);
+
+        }
+
+	ll_remove_first(list);
+
+	printf("after ll_remove \n");
+
+	//_n = (int *)ll_get_first(list);
+
+	void *v = ll_get_first(list);
+
+	if(v == NULL)
+		printf("Value returned is NULL \n");
+
+	//fprintf(stderr, "Value of _n: %d\n", *_n);
+
+	ll_remove_first(list);
 }

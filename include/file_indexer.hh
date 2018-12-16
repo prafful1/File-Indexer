@@ -36,11 +36,17 @@ ll_t *ll_new(gen_fun_t val_teardown);
 
 int ll_insert_n(ll_t *list, void *val, int n);
 
+int ll_insert_n_2(ll_t *list, void *val, int n);
+
 int ll_insert_first(ll_t *list, void *val);
 
 int ll_insert_last(ll_t *list, void *val);
 
 void *ll_get_n(ll_t *list, int n);
+
+int ll_remove_first(ll_t *list);
+
+int ll_remove_n(ll_t *list, int n);
 
 void *ll_get_first(ll_t *list);
 
