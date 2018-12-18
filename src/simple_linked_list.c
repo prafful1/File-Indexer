@@ -45,6 +45,7 @@ ll_t *ll_new(gen_fun_t val_teardown) {
 
 	ll_t *list = (ll_t *)malloc(sizeof(ll_t));
 	list->hd = NULL;
+	list->tail_node = NULL;
 	list->len = 0;
 	list->val_teardown = val_teardown;
 	pthread_rwlock_init(&list->m, NULL);
@@ -91,6 +92,27 @@ int ll_insert_n(ll_t *list, void *val, int n) {
 }
 
 
+int ll_insert_last_2(ll_t *list, void *val) {
+	ll_node_t *new_node = ll_new_node(val);
+	ll_node_t *last_node = NULL;
+	RWLOCK(l_write, list->m);
+	
+	if(list->hd == NULL) {
+		new_node->nxt = list->hd;
+		list->hd = new_node;
+		list->tail_node = new_node;
+	}else {
+		last_node = list->tail_node;
+		last_node->nxt = new_node;
+		list->tail_node = new_node;
+	}
+	
+	(list->len)++;
+	RWUNLOCK(list->m);
+
+	return list->len;
+}
+
 void *ll_get_first(ll_t *list) {
 	
 	return ll_get_n(list, 0);
@@ -132,6 +154,8 @@ int ll_select_n_min_1(ll_t *list, ll_node_t **node, int n, locktype_t lt) {
 		RWUNLOCK(last->m);
 
 	}
+
+	//RWUNLOCK(node->m);
 
 	return 0;
 
@@ -176,9 +200,44 @@ void *ll_get_n(ll_t *list, int n) {
 		return NULL;
 
 	RWUNLOCK(node->m);
-    return node->val;
+	return node->val;
 }
 
+int ll_get_first_element(ll_t *list) {
+
+	int *first_node_val;
+	int null_val = -1;
+	int ret;
+
+	ll_node_t *node = NULL;
+	
+	RWLOCK(l_write, list->m);
+	node = list->hd;
+	
+	if(node == NULL) {
+		RWUNLOCK(list->m);
+		return null_val;
+	}		
+
+	list->hd = node->nxt;
+
+	if(list->hd == NULL)
+		list->tail_node = NULL;
+	
+	(list->len)--;
+	RWUNLOCK(list->m);
+
+	first_node_val = (int *)node->val;
+
+	ret = *first_node_val;
+
+	printf("ret value %d\n", ret);
+
+	list->val_teardown(node->val);
+	free(node);
+
+	return ret;
+}
 
 // Wrapper for `ll_remove_n`.
 int ll_remove_first(ll_t *list) {
@@ -196,14 +255,10 @@ int ll_remove_n(ll_t *list, int n) {
 	RWLOCK(l_write, list->m);
 	tmp = list->hd;
 
-	printf("Before NULL check \n");
-
 	if(tmp == NULL) {
 		RWUNLOCK(list->m);
 		return -1;	
 	}
-
-	printf("After NULL check \n");
 
 	if(tmp->nxt == NULL)
 		printf("tmp->nxt is null \n");		
@@ -222,20 +277,20 @@ int ll_remove_n(ll_t *list, int n) {
 
 int main() {
 
-	int *_n;
-	int c = 2;
+	//int *_n;
+	int c = 3;
 	int d = 100;
 
-	int test_count = 1;
-	int fail_count = 0;
+	//int test_count = 1;
+	//int fail_count = 0;
 
 	ll_t *list = ll_new(num_teardown);
 	list->val_printer = num_printer;
 
-	ll_insert_first(list, &c);
-	_n = (int *)ll_get_first(list);
+	//ll_insert_first(list, &c);
+	//_n = (int *)ll_get_first(list);
 
-	if (!(*_n == c)) {
+	/*if (!(*_n == c)) {
 		fprintf(stderr, "FAIL Test %d: Expected %d, but got %d.\n", test_count, c, *_n);
 		fail_count++;
 
@@ -244,13 +299,47 @@ int main() {
 		fprintf(stderr, "PASS Test %d!\n", test_count);
 		fprintf(stderr, "Value: %d\n", *_n);
 
-	}
+	}*/
 
-	test_count++;
+	//test_count++;
 
-	ll_insert_last(list, &d);
+	//ll_insert_last(list, &d);
 	
-	ll_remove_first(list);
+
+	int len = ll_insert_last_2(list, &c);
+		
+	printf("Length of list %d\n", len);
+
+	len = ll_insert_last_2(list, &d);
+
+	printf("Length of list %d\n", len);
+	
+	int val = ll_get_first_element(list);
+
+	printf("Value in first node %d\n", val);
+
+	val = ll_get_first_element(list);
+
+	printf("Value in first node %d\n", val);
+
+	val = ll_get_first_element(list);
+
+	printf("Value in first node %d\n", val);
+
+	d = 1000;
+
+	len = ll_insert_last_2(list, &d);
+
+	printf("Length of list %d\n", len);	
+
+	val = ll_get_first_element(list);
+
+	printf("Value in first node %d\n", val);
+
+	/*int len = ll_remove_first(list);
+
+	printf("Length of list %d\n", len);
+
 	_n = (int *)ll_get_first(list);
 
 	if (!(*_n == d)) {
@@ -264,18 +353,19 @@ int main() {
 
         }
 
-	ll_remove_first(list);
+	len = ll_remove_first(list);
+
+	printf("Length of list %d\n", len);
 
 	printf("after ll_remove \n");
-
-	//_n = (int *)ll_get_first(list);
 
 	void *v = ll_get_first(list);
 
 	if(v == NULL)
 		printf("Value returned is NULL \n");
 
-	//fprintf(stderr, "Value of _n: %d\n", *_n);
+	len = ll_remove_first(list);
 
-	ll_remove_first(list);
+	printf("Length of list %d\n", len);*/
+
 }
