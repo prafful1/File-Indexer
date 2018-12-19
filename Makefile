@@ -5,7 +5,7 @@ INCDIR = include
 DIRS   = $(SRCDIR) $(OBJDIR) $(BINDIR) $(INDDIR)
 
 # name of executable
-EXEC = simple_linked_list
+EXEC = file_indexer
 
 # all the cource code pregenerated as a string and not just the string `*.c`
 SRC = $(wildcard $(SRCDIR)/*.c)
