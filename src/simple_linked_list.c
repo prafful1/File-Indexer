@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
 #include "file_indexer.hh"
 
 
@@ -22,6 +22,7 @@ struct ll_node {
 	// pointer to the value at the node
 	void *val;
 
+	int data;
 	//pointer to the next node
 	ll_node_t *nxt;
    
@@ -66,7 +67,9 @@ int ll_insert_first(ll_t *list, void *val) {
 ll_node_t *ll_new_node(void *val) {
 	
 	ll_node_t *node = (ll_node_t *)malloc(sizeof(ll_node_t));
-	node->val = val;
+	//node->val = val;
+	node->data = *(int *)val;
+	printf("Value being set %d\n", node->data);
 	node->nxt = NULL;
 	pthread_rwlock_init(&node->m, NULL);
 
@@ -108,6 +111,7 @@ int ll_insert_last_2(ll_t *list, void *val) {
 	}
 	
 	(list->len)++;
+	printf("A new node added. New length of list is %d\n", list->len);
 	RWUNLOCK(list->m);
 
 	return list->len;
@@ -205,7 +209,7 @@ void *ll_get_n(ll_t *list, int n) {
 
 int ll_get_first_element(ll_t *list) {
 
-	int *first_node_val;
+	//int *first_node_val;
 	int null_val = -1;
 	int ret;
 
@@ -225,15 +229,17 @@ int ll_get_first_element(ll_t *list) {
 		list->tail_node = NULL;
 	
 	(list->len)--;
+
+	printf("A node is removed. Length of list is %d\n", list->len);
+
+	printf("Value returned after removing a node %d\n", node->data);
 	RWUNLOCK(list->m);
 
-	first_node_val = (int *)node->val;
+	//first_node_val = (int *)node->val;
 
-	ret = *first_node_val;
+	ret = node->data;
 
-	printf("ret value %d\n", ret);
-
-	list->val_teardown(node->val);
+	//list->val_teardown(node->val);
 	free(node);
 
 	return ret;
@@ -275,38 +281,62 @@ int ll_remove_n(ll_t *list, int n) {
 }
 
 
+struct list_struct {
+
+        ll_t *list;
+        int *val;
+
+};
+
+int file_number;
+
+void *myThreadFunc1(void *arg) {
+
+
+	struct list_struct *l = (struct list_struct *)arg;	
+
+	int temp = 0;
+	while(temp < 20) {
+		sleep(1);
+		file_number = rand() % 20;
+
+		printf("Input Value %d\n", file_number);
+
+		l->val = &file_number;
+
+		ll_insert_last_2(l->list, l->val);
+		temp++;
+	}
+	return NULL;
+}
+
+void *myThreadFunc2(void *arg) {
+
+	struct list_struct *l = (struct list_struct *)arg;
+
+	
+	int temp = 0;
+	while(temp < 50){
+		sleep(2);
+		ll_get_first_element(l->list);
+		temp++;
+	}
+	return NULL;
+}
+
 int main() {
 
-	//int *_n;
 	int c = 3;
-	int d = 100;
+	//int d = 100;
 
-	//int test_count = 1;
-	//int fail_count = 0;
+	pthread_t thread_id1;
+	pthread_t thread_id2;
+	pthread_t thread_id3;
 
 	ll_t *list = ll_new(num_teardown);
 	list->val_printer = num_printer;
 
-	//ll_insert_first(list, &c);
-	//_n = (int *)ll_get_first(list);
-
-	/*if (!(*_n == c)) {
-		fprintf(stderr, "FAIL Test %d: Expected %d, but got %d.\n", test_count, c, *_n);
-		fail_count++;
-
-	} else {
-		
-		fprintf(stderr, "PASS Test %d!\n", test_count);
-		fprintf(stderr, "Value: %d\n", *_n);
-
-	}*/
-
-	//test_count++;
-
-	//ll_insert_last(list, &d);
-	
-
-	int len = ll_insert_last_2(list, &c);
+	/*int len = ll_insert_last_2(list, &c);
 		
 	printf("Length of list %d\n", len);
 
@@ -336,36 +366,20 @@ int main() {
 
 	printf("Value in first node %d\n", val);
 
-	/*int len = ll_remove_first(list);
+	*/
 
-	printf("Length of list %d\n", len);
+	struct list_struct *args = NULL;
 
-	_n = (int *)ll_get_first(list);
+	args = (struct list_struct *)malloc(sizeof(struct list_struct *));
+	args->list = list;
 
-	if (!(*_n == d)) {
-                fprintf(stderr, "FAIL Test %d: Expected %d, but got %d.\n", test_count, d, *_n);
-                fail_count++;
-
-        } else {
-
-                fprintf(stderr, "PASS Test %d!\n", test_count);
-                fprintf(stderr, "Value: %d\n", *_n);
-
-        }
-
-	len = ll_remove_first(list);
-
-	printf("Length of list %d\n", len);
-
-	printf("after ll_remove \n");
-
-	void *v = ll_get_first(list);
-
-	if(v == NULL)
-		printf("Value returned is NULL \n");
-
-	len = ll_remove_first(list);
-
-	printf("Length of list %d\n", len);*/
-
+	args->val = &c; 
+	
+	pthread_create(&thread_id1, NULL, myThreadFunc1, (void *)args);
+	pthread_create(&thread_id2, NULL, myThreadFunc2, (void *)args);
+	pthread_create(&thread_id3, NULL, myThreadFunc2, (void *)args);
+	
+	pthread_join(thread_id1, NULL);
+	pthread_join(thread_id2, NULL);
+	pthread_join(thread_id3, NULL);
 }

@@ -9,6 +9,7 @@ typedef struct ll ll_t;
 // linked list node
 typedef struct ll_node ll_node_t;
 
+
 // linked list structure
 
 struct ll {
@@ -42,6 +43,9 @@ int ll_insert_n(ll_t *list, void *val, int n);
 int ll_insert_n_2(ll_t *list, void *val, int n);
 
 int ll_insert_first(ll_t *list, void *val);
+
+void *myThreadFunc1(void *arg);
+void *myThreadFunc2(void *arg);
 
 int ll_insert_last(ll_t *list, void *val);
 
