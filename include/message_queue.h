@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <string.h>
 
 // useful for casting
 typedef void (*gen_fun_t)(void *);
@@ -16,7 +17,9 @@ typedef struct ll_node ll_node_t;
                                 : pthread_rwlock_wrlock(&(lk))
 #define RWUNLOCK(lk) pthread_rwlock_unlock(&(lk));
 
+#define PATH_MAX 4096
 typedef enum locktype locktype_t;
+
 
 enum locktype {
     l_read,
@@ -30,6 +33,9 @@ struct ll_node {
 
 	// data value in node
 	int data;
+
+	// array to store path of file	
+	char path[PATH_MAX];
 
 	//pointer to the next node
 	ll_node_t *nxt;
@@ -66,7 +72,7 @@ ll_t *ll_new(gen_fun_t val_teardown);
 
 int ll_insert_last_2(ll_t *list, void *val);
 
-int ll_get_first_element(ll_t *list);
+int ll_get_first_element(ll_t *list, char *path);
 
 void ll_print(ll_t list);
 
@@ -99,8 +105,12 @@ ll_t *ll_new(gen_fun_t val_teardown) {
 ll_node_t *ll_new_node(void *val) {
 
         ll_node_t *node = (ll_node_t *)malloc(sizeof(ll_node_t));
-        node->data = *(int *)val;
         node->nxt = NULL;
+	char *str = (char *)val;
+
+	printf("Path String %s\n", str);
+
+	strcpy(node->path, str);
         pthread_rwlock_init(&node->m, NULL);
 
         return node;
@@ -128,11 +138,11 @@ int ll_insert_last_2(ll_t *list, void *val) {
         return list->len;
 }
 
-int ll_get_first_element(ll_t *list) {
+int ll_get_first_element(ll_t *list, char *path) {
 
         int null_val = -1;
         int ret;
-
+	
         ll_node_t *node = NULL;
 
         RWLOCK(l_write, list->m);
@@ -152,12 +162,14 @@ int ll_get_first_element(ll_t *list) {
 
         printf("A node is removed. Length of list is %d\n", list->len);
 
-        printf("Value returned after removing a node %d\n", node->data);
+	strcpy(path, node->path);
+        //printf("Value returned after removing a node %s\n", node->path);
         RWUNLOCK(list->m);
 
-        ret = node->data;
+        ret = 0;
 
-        free(node);
+	if(node != NULL)
+        	free(node);
 
         return ret;
 }
