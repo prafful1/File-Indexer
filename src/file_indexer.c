@@ -41,6 +41,7 @@ int read_file(char *path, hash_map_struct_t *h_map) {
         FILE *fptr;
 	char buffer[255];
         char *content;
+	char *rest;
         fptr = fopen(path, "r");
 
         if(fptr == NULL) {
@@ -52,15 +53,23 @@ int read_file(char *path, hash_map_struct_t *h_map) {
 
 	while(fgets(buffer, 255, (FILE*) fptr)) {
 
+
+		rest = buffer;
+
+		while((content = strtok_r(rest, " ", &rest))) {
+
+			insert_modify(h_map, hash(content), content);
+
+		}
 		
-		content = strtok(buffer, " ");
+		/*content = strtok(buffer, " ");
 
 		while(content != NULL)
 		{
 			insert_modify(h_map, hash(content), content);
 			//printf("'%s'\n", ptr);
 			content = strtok(NULL, " ");
-		}	
+		}*/	
 	}
 
         /*while(content != EOF) {

@@ -132,6 +132,8 @@ void display_top_10(hash_map_struct_t *h_map) {
 
 			if(h_map->hashArray[i] != NULL) {
 			
+				//printf("Word in hashmap: %s\n", h_map->hashArray[i]->word);
+
 				if(h_map->hashArray[i]->data > max_freq)
 				{
 
@@ -143,7 +145,7 @@ void display_top_10(hash_map_struct_t *h_map) {
 		}
 		
 		if(item != NULL) {
-			
+						
 			printf("Word: %s, Frequency: %d\n", item->word, item->data);		
 			item->data = 0;
 			max_freq = 0;
