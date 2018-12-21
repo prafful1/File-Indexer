@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#define SIZE 10000
+#define SIZE 1000000
 #define WORD_SIZE 1000
 
 

@@ -49,34 +49,18 @@ int read_file(char *path, hash_map_struct_t *h_map) {
                 exit(0);
         }
 
-        //content = fgets(fptr);
 
 	while(fgets(buffer, 255, (FILE*) fptr)) {
 
 
 		rest = buffer;
 
-		while((content = strtok_r(rest, " ", &rest))) {
+		while((content = strtok_r(rest, " ,.-", &rest))) {
 
 			insert_modify(h_map, hash(content), content);
 
 		}
-		
-		/*content = strtok(buffer, " ");
-
-		while(content != NULL)
-		{
-			insert_modify(h_map, hash(content), content);
-			//printf("'%s'\n", ptr);
-			content = strtok(NULL, " ");
-		}*/	
 	}
-
-        /*while(content != EOF) {
-                //printf("%c", content);
-		insert_modify(h_map, hash(content), content);
-                content = fgets(fptr);
-        }*/
 
         fclose(fptr);
         return 0;
@@ -96,7 +80,6 @@ void listFilesRecursively(void *arg)
 	
 	DIR *dir;
 	
-	//printf("l->file_path %s\n", l->file_path);
 	strcpy(basePath, l->file_path);
 	dir  = opendir(basePath);
 
@@ -132,9 +115,7 @@ void *add_path_to_msg_queue(void *arg) {
 
 	struct list_struct *l = arg;	
 	list_full_flag = 0;
-	//sleep(1);
 	printf("Path: %s\n", l->file_path);
-	//strcpy(l->file_path, "/root/text_files-dir");
 	listFilesRecursively((void *)l);
 	list_full_flag = 1;
 	return NULL;
@@ -147,12 +128,8 @@ void *extract_path_from_msg_queue(void *arg) {
 	struct list_struct *l = (struct list_struct *)arg;
 	
 	
-	//int temp = 0;
 	while((list_full_flag == 0) || (l->list->hd != NULL)){
-		//sleep(2);
 		ret = ll_get_first_element(l->list, file_path);
-
-		//printf("Value of list_full_flag %d\n", list_full_flag);
 		
 		if(ret == 0) {
 
@@ -161,20 +138,38 @@ void *extract_path_from_msg_queue(void *arg) {
 
 		}
 
-		//temp++;
 	}
 	return NULL;
 }
 
-int main(int argc, char** argv) {
+void help() {
+
+	printf("--help: ./file_indexer <Directory_Path> <Number_of_worker_threads>\n");
+}
+
+void main(int argc, char** argv) {
 
 	pthread_t thread_id1;
 	pthread_t thread_id2;
 	pthread_t thread_id3;
 	pthread_t thread_id4;
 	pthread_t thread_id5;
-	
+	DIR *dir;
 	struct list_struct *args = NULL;
+
+	if(argc <3 || argc > 3) {
+		
+		help();
+		return;		
+	}
+
+	dir  = opendir(argv[1]);
+
+	if(!dir) {
+		printf("Directory path is invalid \n");
+		help();
+		return;
+	}
 
 	ll_t *list = ll_new(num_teardown);
 
