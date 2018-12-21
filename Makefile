@@ -22,7 +22,7 @@ CC = gcc
 # `Werror`  - makes all warnings errors
 # `Wextra`  - enables some extra warning flags that `all` doesn't set
 # `Wunused` - complains about any variable, function, label, etc. not being used
-CFLAGS = -Wall -Werror -Wextra -Wunused
+CFLAGS = 
 # `g`           - generate source code debug info
 # `std=`        - sets the language standard, in this case c99
 # `_GNU_SOURCE` - is a macro that tells the compiler to use rsome gnu functions

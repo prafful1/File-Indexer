@@ -1,7 +1,7 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
-
-int read_file(char *path) {
+#include <hash_map.h>
+int read_file(char *path, hash_map_struct_t *h_map) {
 	
 	FILE *fptr;
 	char content;
@@ -21,4 +21,4 @@ int read_file(char *path) {
 
 	fclose(fptr);
 	return 0;
-}
+}*/

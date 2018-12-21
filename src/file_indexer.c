@@ -7,12 +7,14 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <read_file.h>
+#include "hash_map.h"
 
 #define PATH_MAX 4096
 
 struct list_struct {
 
         ll_t *list;
+	hash_map_struct_t *h_map;
         int *val;
 	char file_path[PATH_MAX];
 };
@@ -30,6 +32,43 @@ int EndsWithtxt( char *string )
         }
 
   return( -1 );
+}
+
+int read_file(char *path, hash_map_struct_t *h_map) {
+
+        FILE *fptr;
+	char buffer[255];
+        char *content;
+        fptr = fopen(path, "r");
+
+        if(fptr == NULL) {
+                printf("Cannot open file \n");
+                exit(0);
+        }
+
+        //content = fgets(fptr);
+
+	while(fgets(buffer, 255, (FILE*) fptr)) {
+
+		
+		content = strtok(buffer, " ");
+
+		while(content != NULL)
+		{
+			insert_modify(h_map, hash(content), content);
+			//printf("'%s'\n", ptr);
+			content = strtok(NULL, " ");
+		}	
+	}
+
+        /*while(content != EOF) {
+                //printf("%c", content);
+		insert_modify(h_map, hash(content), content);
+                content = fgets(fptr);
+        }*/
+
+        fclose(fptr);
+        return 0;
 }
 
 
@@ -103,7 +142,7 @@ void *extract_path_from_msg_queue(void *arg) {
 		if(ret == 0) {
 
 			printf("Path after retreival %s\n", file_path);
-			read_file(file_path);
+			read_file(file_path, l->h_map);
 
 		}
 
@@ -120,10 +159,14 @@ int main() {
 
 	struct list_struct *args = NULL;
 	ll_t *list = ll_new(num_teardown);
+
+	hash_map_struct_t *h_map = hash_map_new();
+
 	list->val_printer = num_printer;
 
 	args = (struct list_struct *)malloc(sizeof(struct list_struct));
 	args->list = list;
+	args->h_map = h_map;
 
 	strcpy(args->file_path, "/dummy123/path123");	
 	
@@ -135,8 +178,14 @@ int main() {
 	pthread_join(thread_id2, NULL);
 	pthread_join(thread_id3, NULL);
 
+	display(args->h_map);
+
 	if(args != NULL)
 		free(args);
 
-	
+	if(list!= NULL)
+		free(list);
+
+	if(h_map != NULL)
+		free(h_map);
 }
