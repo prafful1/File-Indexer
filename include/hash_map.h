@@ -119,6 +119,39 @@ void insert_modify(hash_map_struct_t *h_map, unsigned long key, char *word) {
 	return;
 }
 
+void display_top_10(hash_map_struct_t *h_map) {
+	
+	struct DataItem *item = NULL;
+	int i = 0;
+	int j = 0;
+	int max_freq = 0;
+	
+	for (j = 0; j<10; j++) {
+
+		for(i = 0; i<SIZE; i++) {
+
+			if(h_map->hashArray[i] != NULL) {
+			
+				if(h_map->hashArray[i]->data > max_freq)
+				{
+
+					max_freq = h_map->hashArray[i]->data;
+					item = h_map->hashArray[i];
+				}
+			}
+	
+		}
+		
+		if(item != NULL) {
+			
+			printf("Word: %s, Frequency: %d\n", item->word, item->data);		
+			item->data = 0;
+			max_freq = 0;
+		}
+	}
+}
+
+
 void display(hash_map_struct_t *h_map) {
    int i = 0;
 	
@@ -133,14 +166,3 @@ void display(hash_map_struct_t *h_map) {
    printf("\n");
 }
 
-void *myFuncOne(void *args) {
-
-	hash_map_struct_t *h_map = args; 
-	
-	insert_modify(h_map, hash("Hello World"), "Hello World");
-	insert_modify(h_map, hash("Hello World_2"), "Hello World_2");
-	//insert_modify(h_map, hash("Hello World_2"), 1000, "Hello World_2");
-	insert_modify(h_map, hash("Hello World_3"), "Hello World_3");
-	//insert_modify(h_map, hash("Hello World_2"), 1000, "Hello World_2");
-
-}

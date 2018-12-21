@@ -11,6 +11,8 @@
 
 #define PATH_MAX 4096
 
+int list_full_flag = 0;
+
 struct list_struct {
 
         ll_t *list;
@@ -120,10 +122,12 @@ void listFilesRecursively(void *arg)
 void *add_path_to_msg_queue(void *arg) {
 
 	struct list_struct *l = arg;	
-	sleep(1);
+	list_full_flag = 0;
+	//sleep(1);
 	printf("Path: %s\n", l->file_path);
-	strcpy(l->file_path, "/root/text_files-dir");
+	//strcpy(l->file_path, "/root/text_files-dir");
 	listFilesRecursively((void *)l);
+	list_full_flag = 1;
 	return NULL;
 }
 
@@ -134,10 +138,12 @@ void *extract_path_from_msg_queue(void *arg) {
 	struct list_struct *l = (struct list_struct *)arg;
 	
 	
-	int temp = 0;
-	while(temp < 50){
-		sleep(2);
+	//int temp = 0;
+	while((list_full_flag == 0) || (l->list->hd != NULL)){
+		//sleep(2);
 		ret = ll_get_first_element(l->list, file_path);
+
+		//printf("Value of list_full_flag %d\n", list_full_flag);
 		
 		if(ret == 0) {
 
@@ -146,18 +152,21 @@ void *extract_path_from_msg_queue(void *arg) {
 
 		}
 
-		temp++;
+		//temp++;
 	}
 	return NULL;
 }
 
-int main() {
+int main(int argc, char** argv) {
 
 	pthread_t thread_id1;
 	pthread_t thread_id2;
 	pthread_t thread_id3;
-
+	pthread_t thread_id4;
+	pthread_t thread_id5;
+	
 	struct list_struct *args = NULL;
+
 	ll_t *list = ll_new(num_teardown);
 
 	hash_map_struct_t *h_map = hash_map_new();
@@ -168,17 +177,21 @@ int main() {
 	args->list = list;
 	args->h_map = h_map;
 
-	strcpy(args->file_path, "/dummy123/path123");	
+	strcpy(args->file_path, argv[1]);	
 	
 	pthread_create(&thread_id1, NULL, add_path_to_msg_queue, (void *)args);
 	pthread_create(&thread_id2, NULL, extract_path_from_msg_queue, (void *)args);
 	pthread_create(&thread_id3, NULL, extract_path_from_msg_queue, (void *)args);
+	pthread_create(&thread_id4, NULL, extract_path_from_msg_queue, (void *)args);
+	pthread_create(&thread_id5, NULL, extract_path_from_msg_queue, (void *)args);
 
 	pthread_join(thread_id1, NULL);
 	pthread_join(thread_id2, NULL);
 	pthread_join(thread_id3, NULL);
+	pthread_join(thread_id4, NULL);
+	pthread_join(thread_id5, NULL);
 
-	display(args->h_map);
+	display_top_10(args->h_map);
 
 	if(args != NULL)
 		free(args);
