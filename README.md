@@ -67,7 +67,7 @@ Multi-threaded text file indexing command line application.
 + After all worker threads are done writing into hash map, they exit.
 + main thread runs through hash_map and searches for Top 10 words with maximum frequency and prints that on console. 
 
-# Limitations:
-+ 1 Scanner Thread.
-+ 4 Worker Threads.
-+ Hash_Map can store a maximum of 1000000 unique words.
+# Current Implementation:
++ 1 Scanner Thread. Can be increased.
++ 4 Worker Threads. Can be changed.
++ Hash_Map can store a maximum of 1000000 unique words. Can be changed.
