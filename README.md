@@ -7,6 +7,7 @@ Multi-threaded text file indexing command line application.
 
 # Configuration:
 + git clone https://github.com/prafful1/File-Indexer.git
++ cd File-Indexer
 + Run "make"
 + Generates "bin" and "obj" directory.
 + Generates "file_indexer" binary in "bin" folder.
