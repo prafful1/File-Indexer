@@ -17,6 +17,7 @@ typedef struct ll_node ll_node_t;
                                 : pthread_rwlock_wrlock(&(lk))
 #define RWUNLOCK(lk) pthread_rwlock_unlock(&(lk));
 
+// Maximum length of a File Path.
 #define PATH_MAX 4096
 typedef enum locktype locktype_t;
 
@@ -26,6 +27,7 @@ enum locktype {
     l_write
 };
 
+// Node in Message Queue to store file path.
 struct ll_node {
 
 	// pointer to the value at the node
@@ -44,8 +46,8 @@ struct ll_node {
 	pthread_rwlock_t m;
 };
 
-//linked list structure
 
+//linked list structure
 struct ll {
         //running length
         int len;
@@ -61,14 +63,16 @@ struct ll {
 
         //a function that is called every time a value is deleted
         //with a pointer to that value
-        gen_fun_t val_teardown;
+        //gen_fun_t val_teardown;
 
         //a function that can print the values in a linked list
-        gen_fun_t val_printer;
+        //gen_fun_t val_printer;
 };
 
 
-ll_t *ll_new(gen_fun_t val_teardown);
+//ll_t *ll_new(gen_fun_t val_teardown);
+
+ll_t *ll_new();
 
 int ll_insert_last_2(ll_t *list, void *val);
 
@@ -76,25 +80,32 @@ int ll_get_first_element(ll_t *list, char *path);
 
 void ll_print(ll_t list);
 
-void ll_no_teardown(void *n);
+//void ll_no_teardown(void *n);
 
-void num_teardown(void *n) {
+/*void num_teardown(void *n) {
         *(int *)n *= -1; // just so we can visually inspect removals afterwards
-}
+}*/
 
-void num_printer(void *n) {
+/*void num_printer(void *n) {
         printf(" %d", *(int *)n);
-}
+}*/
 
 // Allocates a new linked list and initiates its values.
 
-ll_t *ll_new(gen_fun_t val_teardown) {
+ll_t *ll_new() {
 
         ll_t *list = (ll_t *)malloc(sizeof(ll_t));
+
+	if(list == NULL)
+	{
+		printf("Error! memory not allocated to linked list. \n");
+		exit(0);
+	}
+
         list->hd = NULL;
         list->tail_node = NULL;
         list->len = 0;
-        list->val_teardown = val_teardown;
+        //list->val_teardown = val_teardown;
         pthread_rwlock_init(&list->m, NULL);
 
         return list;
@@ -105,6 +116,13 @@ ll_t *ll_new(gen_fun_t val_teardown) {
 ll_node_t *ll_new_node(void *val) {
 
         ll_node_t *node = (ll_node_t *)malloc(sizeof(ll_node_t));
+
+	if(node == NULL)
+        {
+                printf("Error! memory not allocated to a node in linked list. \n");
+                exit(0);
+        }
+
         node->nxt = NULL;
 	char *str = (char *)val;
 
@@ -138,6 +156,9 @@ int ll_insert_last_2(ll_t *list, void *val) {
         return list->len;
 }
 
+// Retreives first element from mesage queue
+// Deletes first element from message queue
+// Message queue is empty, unlocks list and returns.
 int ll_get_first_element(ll_t *list, char *path) {
 
         int null_val = -1;
@@ -163,7 +184,6 @@ int ll_get_first_element(ll_t *list, char *path) {
         printf("A node is removed. Length of list is %d\n", list->len);
 
 	strcpy(path, node->path);
-        //printf("Value returned after removing a node %s\n", node->path);
         RWUNLOCK(list->m);
 
         ret = 0;

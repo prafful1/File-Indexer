@@ -4,16 +4,21 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#define SIZE 1000000
+// Maximum Number of Words allowed in Hash Map.
+#define SIZE 1000000 
+
+// Allowed length of each word.
 #define WORD_SIZE 1000
 
 
+// Hash Map Element.
 struct DataItem {
 	int data;
 	unsigned long key;
 	char word[WORD_SIZE];
 };
 
+// Thread-safe Hash Map Structure to store map elements.
 struct hash_map_struct {
 
 	// hash map buckets
@@ -23,30 +28,29 @@ struct hash_map_struct {
 	pthread_rwlock_t m;	
 };
 
-//struct DataItem* hashArray[SIZE]; 
-struct DataItem* dummyItem;
 struct DataItem* item;
 
 typedef struct hash_map_struct hash_map_struct_t;
-
 
 // Allocates a new hash map and initializes lock
 hash_map_struct_t *hash_map_new() {
 
 	hash_map_struct_t *h_map = (hash_map_struct_t *)malloc(sizeof(hash_map_struct_t));
+
+	if(h_map == NULL)                     
+	{
+		printf("Error! memory not allocated.");
+		exit(0);
+	}
+
 	pthread_rwlock_init(&h_map->m, NULL);
 	
 	return h_map;	
 
 }
 
-int hashCode(int key) {
-   return key % SIZE;
-}
-
-
-unsigned long hash(unsigned char *str)
-    {
+// Hash function djb2 by Dan Bernstein
+unsigned long hash(unsigned char *str) {
         unsigned long hash = 5381;
         int c;
 
@@ -54,29 +58,12 @@ unsigned long hash(unsigned char *str)
             hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
         return hash;
-    }
+
+}
 
 
-/*struct DataItem *search(int key) {
-   //get the hash 
-   int hashIndex = hashCode(key);  
-	
-   //move in array until an empty 
-   while(hashArray[hashIndex] != NULL) {
-	
-      if(hashArray[hashIndex]->key == key)
-         return hashArray[hashIndex]; 
-			
-      //go to next cell
-      ++hashIndex;
-		
-      //wrap around the table
-      hashIndex %= SIZE;
-   }        
-	
-   return NULL;        
-}*/
-
+// Inserts a new word in hash map if word does not exist
+// Increments count of a word in map, if word exists
 void insert_modify(hash_map_struct_t *h_map, unsigned long key, char *word) {
 
 	struct DataItem *item;
@@ -119,6 +106,7 @@ void insert_modify(hash_map_struct_t *h_map, unsigned long key, char *word) {
 	return;
 }
 
+// Display Top 10 words with highest frequency from Hash Map. 
 void display_top_10(hash_map_struct_t *h_map) {
 	
 	struct DataItem *item = NULL;
@@ -132,8 +120,6 @@ void display_top_10(hash_map_struct_t *h_map) {
 
 			if(h_map->hashArray[i] != NULL) {
 			
-				//printf("Word in hashmap: %s\n", h_map->hashArray[i]->word);
-
 				if(h_map->hashArray[i]->data > max_freq)
 				{
 
@@ -154,6 +140,7 @@ void display_top_10(hash_map_struct_t *h_map) {
 }
 
 
+// Print complete Haah Map. 
 void display(hash_map_struct_t *h_map) {
    int i = 0;
 	

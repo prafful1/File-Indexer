@@ -7,7 +7,7 @@ DIRS   = $(SRCDIR) $(OBJDIR) $(BINDIR) $(INDDIR)
 # name of executable
 EXEC = file_indexer
 
-# all the cource code pregenerated as a string and not just the string `*.c`
+# all the source code pregenerated as a string and not just the string `*.c`
 SRC = $(wildcard $(SRCDIR)/*.c)
 FILES = $(notdir $(SRC))
 # loses the `.c` suffix
@@ -18,18 +18,11 @@ OBJ = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(tmp)))
 # gnu c compiler
 CC = gcc
 
-# `Wall`    - warns about questionable things
-# `Werror`  - makes all warnings errors
-# `Wextra`  - enables some extra warning flags that `all` doesn't set
-# `Wunused` - complains about any variable, function, label, etc. not being used
-CFLAGS = 
 # `g`           - generate source code debug info
-# `std=`        - sets the language standard, in this case c99
 # `_GNU_SOURCE` - is a macro that tells the compiler to use rsome gnu functions
 # `pthred`      - adds support for multithreading with the pthreads lib (for preprocessor
 #                 and linker)
-# `O3`          - the level of optimization
-CFLAGS += -g -std=c99 -D_GNU_SOURCE -pthread -O3
+CFLAGS += -g -D_GNU_SOURCE -pthread
 # `-I` - adds directory to the system search path (for include files)
 CFLAGS += -I"$(INCDIR)"
 

@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "file_indexer.h"
 #include "message_queue.h"
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <read_file.h>
 #include "hash_map.h"
 
 #define PATH_MAX 4096
 
+// Flag is set to 1 when scanner thread is done with 
+// searching all ".txt" files and added to message queue.
 int list_full_flag = 0;
 
+// Main structure points to message queue and hash map.
 struct list_struct {
 
         ll_t *list;
@@ -22,8 +23,11 @@ struct list_struct {
 };
 
 
+void *add_path_to_msg_queue(void *arg);
+void *extract_path_from_msg_queue(void *arg);
 void listFilesRecursively(void *arg);
 
+// Determine if a file ends with ".txt"
 int EndsWithtxt( char *string )
 {
   char *string1 = strrchr(string, '.');
@@ -36,6 +40,9 @@ int EndsWithtxt( char *string )
   return( -1 );
 }
 
+// Reads a file.
+// Break file's contents into tokens.
+// Add each token into hash map.
 int read_file(char *path, hash_map_struct_t *h_map) {
 
         FILE *fptr;
@@ -110,7 +117,7 @@ void listFilesRecursively(void *arg)
 	closedir(dir);
 }
 
-
+// Adds a file path to message queue.
 void *add_path_to_msg_queue(void *arg) {
 
 	struct list_struct *l = arg;	
@@ -121,6 +128,8 @@ void *add_path_to_msg_queue(void *arg) {
 	return NULL;
 }
 
+// Extracts path from message queue by worker thread.
+// Calls read_file on each file path.
 void *extract_path_from_msg_queue(void *arg) {
 
 	char file_path[PATH_MAX];
@@ -171,11 +180,9 @@ void main(int argc, char** argv) {
 		return;
 	}
 
-	ll_t *list = ll_new(num_teardown);
+	ll_t *list = ll_new();
 
 	hash_map_struct_t *h_map = hash_map_new();
-
-	list->val_printer = num_printer;
 
 	args = (struct list_struct *)malloc(sizeof(struct list_struct));
 	args->list = list;
