@@ -126,8 +126,6 @@ ll_node_t *ll_new_node(void *val) {
         node->nxt = NULL;
 	char *str = (char *)val;
 
-	printf("Path String %s\n", str);
-
 	strcpy(node->path, str);
         pthread_rwlock_init(&node->m, NULL);
 
@@ -150,7 +148,7 @@ int ll_insert_last_2(ll_t *list, void *val) {
         }
 
         (list->len)++;
-        printf("A new node added. New length of list is %d\n", list->len);
+        //printf("A new node added. New length of Message Queue is %d\n", list->len);
         RWUNLOCK(list->m);
 
         return list->len;
@@ -181,7 +179,7 @@ int ll_get_first_element(ll_t *list, char *path) {
 
         (list->len)--;
 
-        printf("A node is removed. Length of list is %d\n", list->len);
+        //printf("A node is removed. Length of Message Queue is %d\n", list->len);
 
 	strcpy(path, node->path);
         RWUNLOCK(list->m);

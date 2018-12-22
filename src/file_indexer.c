@@ -104,7 +104,7 @@ void listFilesRecursively(void *arg)
 			strcat(path, dp->d_name);
 
 			if(p == 0) {
-				printf("Path %s\n", path);
+				//printf("Path %s\n", path);
 				strcpy(l->file_path, path);
 				ll_insert_last_2(l->list, l->file_path);
 			}
@@ -122,7 +122,7 @@ void *add_path_to_msg_queue(void *arg) {
 
 	struct list_struct *l = arg;	
 	list_full_flag = 0;
-	printf("Path: %s\n", l->file_path);
+	//printf("Path: %s\n", l->file_path);
 	listFilesRecursively((void *)l);
 	list_full_flag = 1;
 	return NULL;
@@ -142,7 +142,7 @@ void *extract_path_from_msg_queue(void *arg) {
 		
 		if(ret == 0) {
 
-			printf("Path after retreival %s\n", file_path);
+			printf("File Path extracted from message queue %s\n", file_path);
 			read_file(file_path, l->h_map);
 
 		}
@@ -158,11 +158,15 @@ void help() {
 
 void main(int argc, char** argv) {
 
+	// Scanner thread
 	pthread_t thread_id1;
+
+	// Worker Threads
 	pthread_t thread_id2;
 	pthread_t thread_id3;
 	pthread_t thread_id4;
 	pthread_t thread_id5;
+
 	DIR *dir;
 	struct list_struct *args = NULL;
 
@@ -185,22 +189,75 @@ void main(int argc, char** argv) {
 	hash_map_struct_t *h_map = hash_map_new();
 
 	args = (struct list_struct *)malloc(sizeof(struct list_struct));
+	
+	if(args == NULL)
+        {
+                printf("Error! memory not allocated structure that points to hash map and linked list. \n");
+                exit(0);
+        }
+	
 	args->list = list;
 	args->h_map = h_map;
 
 	strcpy(args->file_path, argv[1]);	
+
+	printf("######################################################\n");
 	
-	pthread_create(&thread_id1, NULL, add_path_to_msg_queue, (void *)args);
-	pthread_create(&thread_id2, NULL, extract_path_from_msg_queue, (void *)args);
-	pthread_create(&thread_id3, NULL, extract_path_from_msg_queue, (void *)args);
-	pthread_create(&thread_id4, NULL, extract_path_from_msg_queue, (void *)args);
-	pthread_create(&thread_id5, NULL, extract_path_from_msg_queue, (void *)args);
+	if (pthread_create(&thread_id1, NULL, add_path_to_msg_queue, (void *)args) != 0) {
+		perror("Error: Scanner thread could not be created \n");
+		exit(1);
+	}else {
+		printf("Scanner Thread started \n");
+	}
+
+	printf("######################################################\n");
+
+	if (pthread_create(&thread_id2, NULL, extract_path_from_msg_queue, (void *)args) != 0) {
+		perror("Error: Worker thread 1 could not be created \n");
+		exit(1);
+	}else {
+		printf("Worker Thread 1 started \n");
+	}
+
+	printf("######################################################\n");
+
+	if (pthread_create(&thread_id3, NULL, extract_path_from_msg_queue, (void *)args) != 0) {
+		perror("Error: Worker thread 2 could not be created \n");
+		exit(1);
+	}else {
+		printf("Worker Thread 2 started \n");
+	}
+
+	printf("######################################################\n");
+
+
+	if(pthread_create(&thread_id4, NULL, extract_path_from_msg_queue, (void *)args) != 0) {
+		perror("Error: Worker thread 3 could not be created \n");
+		exit(1);
+	}else {
+		
+		printf("Worker Thread 3 started \n");
+	}
+	
+	printf("######################################################\n");
+
+	
+	if(pthread_create(&thread_id5, NULL, extract_path_from_msg_queue, (void *)args) != 0) {
+		perror("Error: Worker thread 3 could not be created \n");
+		exit(1);
+	}else {
+		printf("Worker Thread 4 started\n");
+	}
+
+	printf("######################################################\n");
 
 	pthread_join(thread_id1, NULL);
 	pthread_join(thread_id2, NULL);
 	pthread_join(thread_id3, NULL);
 	pthread_join(thread_id4, NULL);
 	pthread_join(thread_id5, NULL);
+
+	printf("Printing Top 10 words \n");
 
 	display_top_10(args->h_map);
 
@@ -212,4 +269,6 @@ void main(int argc, char** argv) {
 
 	if(h_map != NULL)
 		free(h_map);
+	
+	return;
 }
