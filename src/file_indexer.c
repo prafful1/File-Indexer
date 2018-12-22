@@ -153,7 +153,7 @@ void *extract_path_from_msg_queue(void *arg) {
 
 void help() {
 
-	printf("--help: ./file_indexer <Directory_Path> <Number_of_worker_threads>\n");
+	printf("--help: ./file_indexer <Directory_Path> \n");
 }
 
 void main(int argc, char** argv) {
@@ -166,7 +166,7 @@ void main(int argc, char** argv) {
 	DIR *dir;
 	struct list_struct *args = NULL;
 
-	if(argc <3 || argc > 3) {
+	if(argc < 2 || argc > 2) {
 		
 		help();
 		return;		
