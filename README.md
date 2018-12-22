@@ -1,15 +1,19 @@
 # File-Indexer
 Multi-threaded text file indexing command line application. 
 
+# System Info:
++ Linux 4.16.0-rc4 #3 SMP Sat Mar 10 02:42:36 EST 2018 x86_64 x86_64 x86_64 GNU/Linux
++ gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-16)
+
 # Configuration:
 + git clone https://github.com/prafful1/File-Indexer.git
 + Run "make"
 + Generates "bin" and "obj" directory.
 + Generates "file_indexer" binary in "bin" folder.
 + Run following command in "bin" folder: "./file_indexer <Directory_Path>".
++ Run "make clean" to delete files from "obj/" and "bin/" folder.
 
 # Output:
-
 + Input Command: ./file_indexer /root/text_files-dir
 
 + Sample Output:
@@ -21,11 +25,11 @@ Multi-threaded text file indexing command line application.
 + Worker Thread 2 started
 + ######################################################
 + Worker Thread 3 started
++ File Path extracted from message queue /root/text_files-dir/file2.txt
 + ######################################################
 + Worker Thread 4 started
-+ ######################################################
-+ File Path extracted from message queue /root/text_files-dir/file2.txt
 + File Path extracted from message queue /root/text_files-dir/pqrs/pqrs2/zmap.txt
++ ######################################################
 + File Path extracted from message queue /root/text_files-dir/pqrs/text.txt
 + File Path extracted from message queue /root/text_files-dir/pqrs/file3.txt
 + File Path extracted from message queue /root/text_files-dir/pqrs/file.txt
@@ -66,4 +70,4 @@ Multi-threaded text file indexing command line application.
 # Limitations:
 + 1 Scanner Thread.
 + 4 Worker Threads.
-+ Hash_Map can store a maximum of 1000000.
++ Hash_Map can store a maximum of 1000000 unique words.

@@ -61,12 +61,6 @@ struct ll {
         //mutex for thread safety
         pthread_rwlock_t m;
 
-        //a function that is called every time a value is deleted
-        //with a pointer to that value
-        //gen_fun_t val_teardown;
-
-        //a function that can print the values in a linked list
-        //gen_fun_t val_printer;
 };
 
 
@@ -79,16 +73,6 @@ int ll_insert_last_2(ll_t *list, void *val);
 int ll_get_first_element(ll_t *list, char *path);
 
 void ll_print(ll_t list);
-
-//void ll_no_teardown(void *n);
-
-/*void num_teardown(void *n) {
-        *(int *)n *= -1; // just so we can visually inspect removals afterwards
-}*/
-
-/*void num_printer(void *n) {
-        printf(" %d", *(int *)n);
-}*/
 
 // Allocates a new linked list and initiates its values.
 
@@ -105,7 +89,6 @@ ll_t *ll_new() {
         list->hd = NULL;
         list->tail_node = NULL;
         list->len = 0;
-        //list->val_teardown = val_teardown;
         pthread_rwlock_init(&list->m, NULL);
 
         return list;
@@ -148,7 +131,6 @@ int ll_insert_last_2(ll_t *list, void *val) {
         }
 
         (list->len)++;
-        //printf("A new node added. New length of Message Queue is %d\n", list->len);
         RWUNLOCK(list->m);
 
         return list->len;
@@ -179,8 +161,6 @@ int ll_get_first_element(ll_t *list, char *path) {
 
         (list->len)--;
 
-        //printf("A node is removed. Length of Message Queue is %d\n", list->len);
-
 	strcpy(path, node->path);
         RWUNLOCK(list->m);
 
@@ -191,4 +171,3 @@ int ll_get_first_element(ll_t *list, char *path) {
 
         return ret;
 }
-

@@ -112,6 +112,7 @@ void display_top_10(hash_map_struct_t *h_map) {
 	struct DataItem *item = NULL;
 	int i = 0;
 	int j = 0;
+	int flag = 0;
 	int max_freq = 0;
 	
 	for (j = 0; j<10; j++) {
@@ -120,6 +121,7 @@ void display_top_10(hash_map_struct_t *h_map) {
 
 			if(h_map->hashArray[i] != NULL) {
 			
+				flag = 1;
 				if(h_map->hashArray[i]->data > max_freq)
 				{
 
@@ -137,6 +139,11 @@ void display_top_10(hash_map_struct_t *h_map) {
 			max_freq = 0;
 		}
 	}
+
+	if(flag == 0)
+		printf("No words found in hash_map \n");
+	
+	return;
 }
 
 
